@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+  <!--
+  Copyright (c) 2012 The Native Client Authors. All rights reserved.
+  Use of this source code is governed by a BSD-style license that can be
+  found in the LICENSE file.
+  -->
+
+<head>
+
+  <title>ffplay in Native Client</title>
+
+  <script type="text/javascript">
+    var file_id;
+    var ffnaclMod = null;  // Global application object.
+    statusText = 'NO-STATUS';
+
+    function moduleDidLoad() {
+      ffnaclMod = document.getElementById('ffnacl');
+      updateStatus('SUCCESS');
+    }
+
+    function handleMessage(message_event) {
+      console.log(message_event.data);
+    }
+    
+    function postMessageToModule(message_event) {
+      
+      ffnaclMod.postMessage
+    }
+    
+    function handleFileSelect(evt) {
+      var file = evt.target.files[0];
+      var rom_url = URL.createObjectURL(file);
+      startPlay(file.name);
+    }
+        
+    function startPlay(fn) {
+      file_id = fn;
+    
+      var nacl = document.createElement('embed');
+      nacl.setAttribute('name', 'nacl_module');
+      nacl.setAttribute('id', 'ffnacl');
+      nacl.setAttribute('width', 720);
+      nacl.setAttribute('height', 480);
+      nacl.setAttribute('src', 'ffnacl.nmf');
+      nacl.setAttribute('type', 'application/x-nacl');
+      nacl.setAttribute('filename',  fn);
+      
+      document.getElementById('player').innerHTML = '';
+      document.getElementById('player').appendChild(nacl);
+
+    }
+    
+    // If the page loads before the Native Client module loads, then set the
+    // status message indicating that the module is still loading.  Otherwise,
+    // do not change the status message.
+    function pageDidLoad()
+    {
+      if (ffnaclMod == null)
+      {
+        updateStatus('Loading');
+      }
+      else
+      {
+        updateStatus();
+      }
+    }
+
+    function updateStatus(opt_message) {
+      if (opt_message)
+        statusText = opt_message;
+      var statusField = document.getElementById('status_field');
+      if (statusField) {
+        statusField.innerHTML = statusText;
+      }
+    }
+    function onClickBtn(method)
+    {
+        console.log(method);
+        if (method == 'open')
+        {
+            var fp = document.getElementById('filepath');
+            startPlay(fp.value);
+        }
+        else if (method == 'pause')
+        {
+            ffnaclMod.postMessage(method);
+        }        
+        else if (method == 'fastforward')
+        {
+            ffnaclMod.postMessage(method);
+        }        
+        else if (method == 'rewind')
+        {
+            ffnaclMod.postMessage(method);
+        }        
+    }
+    
+  </script>
+</head>
+<body onload="pageDidLoad()">
+
+<h2>Native Client - ffplay</h2>
+<h2>Status</h2>
+<div id="status_field">NO-STATUS</div>
+Please input media file path:
+<input  title="Input media file path" 
+        id="filepath" 
+        name="filepath" 
+        type="text"
+        size="80" 
+        value="/Users/cyberlink/_videos/RedPig.mpg"/>
+<input type="button" value="Open" onClick="onClickBtn('open');"/>
+<p>
+<table border="3">
+   <tbody>
+     <tr>
+       <td>SPACE</td>
+       <td>LEFT (<-)</td>
+       <td>RIGHT(->)</td>
+      </tr>
+     <tr>
+       <td>Rewind video</td>
+       <td>Fastforward video</td>
+       <td>Pause video</td>
+     </tr>
+   </tbody>
+ </table>
+</p>
+
+<p>
+  <div id="listener">
+    <script type="text/javascript">
+      var listener = document.getElementById('listener');
+      listener.addEventListener('load', moduleDidLoad, true);
+      listener.addEventListener('message', handleMessage, true);
+    </script>
+    <div id="player"/>
+  </div>
+</p>
+<input type="button" value="||"  onClick="onClickBtn('pause');"/>
+<input type="button" value="<<"  onClick="onClickBtn('rewind');"/>
+<input type="button" value=">>"  onClick="onClickBtn('fastforward');"/>
+</body>
+</html>
